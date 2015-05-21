@@ -153,7 +153,7 @@ func getExecCmd() (string, []string) {
 	return config.baseCmd, args
 }
 
-func split(srcFileName string) {
+func split() {
 	cmd, args := getExecCmd()
 	err := exec.Command(cmd, args...).Run()
 	if err != nil {
@@ -164,13 +164,11 @@ func split(srcFileName string) {
 }
 
 func main() {
-	var srcFileName string
-
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: [input filename]")
 		return
 	}
 	generateConfig(os.Args[1])
-	split(srcFileName)
+	split()
 	return
 }
