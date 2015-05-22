@@ -57,7 +57,7 @@ func getFileContent(filename string) []byte {
 }
 
 func uploadFile(dest string, filename string) {
-	err := S3Instance.bucket.Put(dest, getFileContent(filename), "content-type", s3.Private, s3.Options{})
+	err := S3Instance.bucket.Put(dest, getFileContent(filename), "content-type", s3.PublicRead, s3.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}

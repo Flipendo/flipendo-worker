@@ -14,7 +14,7 @@ const (
 	_segmentsFileName = "segments.list"
 	_chunkDuration    = 20
 	_overwrite        = true
-	_experimental     = false
+	_experimental     = true
 	_videoCodec       = "h264"
 	_audioCodec       = "aac"
 	_container        = "mkv"
@@ -106,6 +106,9 @@ func (file *File) GetSplitCmd() (string, []string) {
 func (file *File) GetTranscodeCmd(chunk string) (string, []string) {
 	args := []string{}
 
+	if _overwrite {
+		args = append(args, "-y")
+	}
 	args = append(args, "-i")
 	args = append(args, _amazonUrl+"chunks/"+file.id+"/"+chunk+file.extension)
 	args = append(args, "-c:v")
