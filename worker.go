@@ -50,7 +50,8 @@ func createQueues() {
 
 func connectToBroker() {
 	var err error
-	MQInstance.connection, err = amqp.Dial(os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR"))
+	MQInstance.connection, err = amqp.Dial("amqp://" + os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR") +
+		":" + os.Getenv("RABBITMQ_PORT_5672_TCP_PORT"))
 	failOnError(err, "Failed to connect to RabbitMQ")
 	fmt.Println("Successfully connected to RabbitMQ")
 	MQInstance.channel, err = MQInstance.connection.Channel()
