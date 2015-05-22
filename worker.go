@@ -93,6 +93,8 @@ func listenToWQueue() {
 		switch data["action"].(string) {
 		case "split":
 			file := NewFile(data["id"].(string) + data["extension"].(string))
+			file.id = data["id"].(string)
+			file.extension = data["extension"].(string)
 			nb := file.Split()
 			msg, err := json.Marshal(map[string]interface{}{
 				"action": "split",
@@ -103,11 +105,10 @@ func listenToWQueue() {
 			fmt.Printf("publishing: %d chunks to %s\n", nb, _apiQueueName)
 			publishToQueue(_apiQueueName, "text/json", msg)
 			fmt.Println("Successfully published message to api channel")
-			return
 		case "transcode":
-			return
+			fmt.Println("RECEIVED TRANSCODE MESSAGE, HURRAY")
 		case "concat":
-			return
+			fmt.Println("RECEIVED CONCAT MESSAGE, HURRAY")
 		default:
 			log.Fatal("Unrecognized action")
 		}

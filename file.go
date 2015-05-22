@@ -20,7 +20,9 @@ const (
 )
 
 type File struct {
-	filename string
+	filename  string
+	id        string
+	extension string
 }
 
 func NewFile(path string) *File {
@@ -37,7 +39,7 @@ func (file *File) Split() int {
 		log.Fatal(err)
 	}
 	fmt.Println("About to prepare for upload")
-	nb := prepareForUpload()
+	nb := prepareForUpload(file)
 	return nb
 }
 
@@ -83,9 +85,7 @@ func (file *File) GetSplitCmd() (string, []string) {
 		args = append(args, "-strict")
 		args = append(args, "-2")
 	}
-	args = append(args, strings.Join([]string{"fromawstest",
-		"%d",
-		".mp4"}, ""))
+	args = append(args, "%d"+file.extension)
 	fmt.Println(args)
 
 	return _baseCmd, args
