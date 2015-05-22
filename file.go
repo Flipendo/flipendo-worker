@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os/exec"
@@ -16,7 +17,8 @@ const (
 	_experimental     = false
 	_videoCodec       = "h264"
 	_audioCodec       = "aac"
-	_amazonUrl        = "https://s3-ap-southeast-2.amazonaws.com/flipendo/files/"
+	_container        = "mkv"
+	_amazonUrl        = "https://s3-ap-southeast-2.amazonaws.com/flipendo/"
 )
 
 type File struct {
@@ -52,13 +54,23 @@ func (file *File) Concat() {
 	}
 }
 
-func (file *File) Transcode() {
-	cmd, args := file.GetTranscodeCmd()
+func (file *File) Transcode(chunk string) {
+	cmd, args := file.GetTranscodeCmd(chunk)
 	err := exec.Command(cmd, args...).Run()
 	if err != nil {
 		fmt.Println("failure in transcode")
 		log.Fatal(err)
 	}
+	uploadFile("chunks/"+file.id+"/out/"+chunk+"."+_container, chunk+"."+_container)
+	msg, err := json.Marshal(map[string]interface{}{
+		"action": "transcoded",
+		"id":     file.id,
+		"chunk":  chunk,
+		"done":   true,
+		"error":  false,
+	})
+	failOnError(err, "Failed to marshal message")
+	publishToQueue(_apiQueueName, "text/json", msg)
 }
 
 func (*File) Upload() {
@@ -72,7 +84,7 @@ func (file *File) GetSplitCmd() (string, []string) {
 		args = append(args, "-y")
 	}
 	args = append(args, "-i")
-	args = append(args, _amazonUrl+file.filename)
+	args = append(args, _amazonUrl+"files/"+file.filename)
 	args = append(args, "-f")
 	args = append(args, "segment")
 	args = append(args, "-segment_time")
@@ -91,11 +103,11 @@ func (file *File) GetSplitCmd() (string, []string) {
 	return _baseCmd, args
 }
 
-func (file *File) GetTranscodeCmd() (string, []string) {
+func (file *File) GetTranscodeCmd(chunk string) (string, []string) {
 	args := []string{}
 
 	args = append(args, "-i")
-	args = append(args, file.filename)
+	args = append(args, _amazonUrl+"chunks/"+file.id+"/"+chunk+file.extension)
 	args = append(args, "-c:v")
 	args = append(args, _videoCodec)
 	args = append(args, "-c:a")
@@ -104,8 +116,7 @@ func (file *File) GetTranscodeCmd() (string, []string) {
 		args = append(args, "-strict")
 		args = append(args, "-2")
 	}
-	args = append(args, strings.Join([]string{"transcodedOutput",
-		".mkv"}, ""))
+	args = append(args, chunk+".mkv")
 	fmt.Println(args)
 
 	return _baseCmd, args

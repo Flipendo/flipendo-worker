@@ -7,20 +7,26 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/AdRoll/goamz/aws"
 	"github.com/AdRoll/goamz/s3"
 )
 
-func awsInit() (*s3.Bucket, error) {
+var S3Instance struct {
+	bucket *s3.Bucket
+}
+
+func awsInit() error {
 	auth, err := aws.GetAuth("", "", "", time.Time{})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	client := s3.New(auth, aws.APSoutheast2)
 
-	return client.Bucket("flipendo"), nil
+	S3Instance.bucket = client.Bucket("flipendo")
+	return nil
 }
 
 func getFileContent(filename string) []byte {
@@ -50,18 +56,14 @@ func getFileContent(filename string) []byte {
 	return data
 }
 
-func uploadFile(bucket *s3.Bucket, dest string, filename string) {
-	err := bucket.Put(dest, getFileContent(filename), "content-type", s3.Private, s3.Options{})
+func uploadFile(dest string, filename string) {
+	err := S3Instance.bucket.Put(dest, getFileContent(filename), "content-type", s3.Private, s3.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func prepareForUpload(srcFile *File) int {
-	bucket, err := awsInit()
-	if err != nil {
-		log.Fatal(err)
-	}
 	file, err := os.Open(_segmentsFileName)
 	if err != nil {
 		log.Fatal(err)
@@ -74,11 +76,11 @@ func prepareForUpload(srcFile *File) int {
 		filename := scanner.Text()
 		files = append(files, filename)
 		go func(count int) {
-			uploadFile(bucket, "chunks/"+srcFile.id+"/"+filename, filename)
+			uploadFile("chunks/"+srcFile.id+"/"+filename, filename)
 			msg, err := json.Marshal(map[string]interface{}{
 				"action":    "transcode",
 				"id":        srcFile.id,
-				"chunk":     count,
+				"chunk":     strconv.Itoa(count),
 				"extension": srcFile.extension,
 			})
 			failOnError(err, "Failed to marshal message")

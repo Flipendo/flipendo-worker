@@ -107,6 +107,10 @@ func listenToWQueue() {
 			fmt.Println("Successfully published message to api channel")
 		case "transcode":
 			fmt.Println("RECEIVED TRANSCODE MESSAGE, HURRAY")
+			file := NewFile(data["id"].(string) + data["extension"].(string))
+			file.id = data["id"].(string)
+			file.extension = data["extension"].(string)
+			file.Transcode(data["chunk"].(string))
 		case "concat":
 			fmt.Println("RECEIVED CONCAT MESSAGE, HURRAY")
 		default:
@@ -130,6 +134,8 @@ func publishToQueue(queueName string, contentType string, body []byte) {
 }
 
 func main() {
+	err := awsInit()
+	failOnError(err, "aws init failed")
 	connectToBroker()
 	defer disconnectFromBroker()
 	createQueues()
