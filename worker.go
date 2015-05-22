@@ -31,7 +31,7 @@ func createQueues() {
 	_, err := MQInstance.channel.QueueDeclare(
 		_apiQueueName,
 		false,
-		false,
+		true,
 		false,
 		false,
 		nil,
@@ -41,7 +41,7 @@ func createQueues() {
 	_, err = MQInstance.channel.QueueDeclare(
 		_workerQueueName,
 		false,
-		false,
+		true,
 		false,
 		false,
 		nil,
@@ -52,6 +52,8 @@ func createQueues() {
 func connectToBroker() {
 	var err error
 	for i := 0; i < 10; i++ {
+		fmt.Printf("Trying to connect to: %s\n", "amqp://"+os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR")+
+			":"+os.Getenv("RABBITMQ_PORT_5672_TCP_PORT"))
 		MQInstance.connection, err = amqp.Dial("amqp://" + os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR") +
 			":" + os.Getenv("RABBITMQ_PORT_5672_TCP_PORT"))
 		if err == nil {
