@@ -6,8 +6,8 @@ RUN git clone https://github.com/FFmpeg/FFmpeg.git && cd FFmpeg && ./configure -
 RUN mkdir /GO
 ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/lib
 ENV GOPATH /GO
-COPY . /GO/src/github.com/Flipendo/flipendo-worker
-WORKDIR /GO/src/github.com/Flipendo/flipendo-worker
+COPY . /GO/src/github.com/flipendo/flipendo-worker
+WORKDIR /GO/src/github.com/flipendo/flipendo-worker
 RUN go get ./...
 RUN go install
 CMD ["/GO/bin/flipendo-worker"]
