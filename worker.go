@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -86,6 +87,29 @@ func listenToWQueue() {
 
 	for d := range msgs {
 		log.Printf("Received a message: %s", d.Body)
+		var data map[string]interface{}
+		err = json.Unmarshal(d.Body, &data)
+		failOnError(err, "Failed to unmarshal message")
+		switch data["action"].(string) {
+		case "split":
+			file := NewFile(data["id"].(string) + data["extension"].(string))
+			nb := file.Split()
+			msg, err := json.Marshal(map[string]interface{}{
+				"action": "split",
+				"id":     data["id"].(string),
+				"chunks": nb,
+			})
+			failOnError(err, "Failed to marshal message")
+			publishToQueue(_apiQueueName, "text/json", msg)
+
+			return
+		case "transcode":
+			return
+		case "concat":
+			return
+		default:
+			log.Fatal("Unrecognized action")
+		}
 	}
 }
 

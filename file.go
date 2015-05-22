@@ -11,11 +11,12 @@ import (
 const (
 	_baseCmd          = "ffmpeg"
 	_segmentsFileName = "segments.list"
-	_chunkDuration    = 200
+	_chunkDuration    = 20
 	_overwrite        = true
 	_experimental     = false
 	_videoCodec       = "h264"
 	_audioCodec       = "aac"
+	_amazonUrl        = "https://s3-ap-southeast-2.amazonaws.com/flipendo/files/"
 )
 
 type File struct {
@@ -28,13 +29,15 @@ func NewFile(path string) *File {
 	}
 }
 
-func (file *File) Split() {
+func (file *File) Split() int {
 	cmd, args := file.GetSplitCmd()
 	err := exec.Command(cmd, args...).Run()
 	if err != nil {
 		fmt.Println("failure in split")
 		log.Fatal(err)
 	}
+	nb := prepareForUpload()
+	return nb
 }
 
 func (file *File) Concat() {
@@ -66,7 +69,7 @@ func (file *File) GetSplitCmd() (string, []string) {
 		args = append(args, "-y")
 	}
 	args = append(args, "-i")
-	args = append(args, file.filename)
+	args = append(args, _amazonUrl+file.filename)
 	args = append(args, "-f")
 	args = append(args, "segment")
 	args = append(args, "-segment_time")
