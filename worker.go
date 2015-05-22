@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -50,8 +51,14 @@ func createQueues() {
 
 func connectToBroker() {
 	var err error
-	MQInstance.connection, err = amqp.Dial("amqp://" + os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR") +
-		":" + os.Getenv("RABBITMQ_PORT_5672_TCP_PORT"))
+	for i := 0; i < 10; i++ {
+		MQInstance.connection, err = amqp.Dial("amqp://" + os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR") +
+			":" + os.Getenv("RABBITMQ_PORT_5672_TCP_PORT"))
+		if err == nil {
+			break
+		}
+		time.Sleep(2 * time.Second)
+	}
 	failOnError(err, "Failed to connect to RabbitMQ")
 	fmt.Println("Successfully connected to RabbitMQ")
 	MQInstance.channel, err = MQInstance.connection.Channel()
@@ -78,6 +85,20 @@ func listenToWQueue() {
 	for d := range msgs {
 		log.Printf("Received a message: %s", d.Body)
 	}
+}
+
+func publishToQueue(queueName string, contentType string, body []byte) {
+	err := MQInstance.channel.Publish(
+		"",
+		queueName,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: contentType,
+			Body:        body,
+		},
+	)
+	failOnError(err, "Failed to publish a message")
 }
 
 func main() {
