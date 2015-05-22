@@ -109,9 +109,6 @@ func main() {
 	createQueues()
 	go listenToWQueue()
 
-	testFile := NewFile("test.test")
-	fmt.Println("file %s set", testFile.filename)
-
 	termChan := make(chan os.Signal)
 	signal.Notify(termChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
