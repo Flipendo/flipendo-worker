@@ -27,19 +27,12 @@ func generateConfig(filename string) {
 func getExecCmd() (string, []string) {
 	args := []string{}
 
-	// if config.overwrite {
-	// 	args = append(args, "-y")
-	// }
 	args = append(args, "-i")
 	args = append(args, config.srcFileName)
 	args = append(args, "-c:v")
 	args = append(args, config.videoCodec)
 	args = append(args, "-c:a")
-	// args = append(args, strconv.Itoa(config.chunkDuration))
-	// args = append(args, "-segment_list")
 	args = append(args, config.audioCodec)
-	// args = append(args, "-c")
-	// args = append(args, "copy")
 	if config.experimental {
 		args = append(args, "-strict")
 		args = append(args, "-2")
