@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 )
@@ -20,5 +21,6 @@ func prepareForUpload() int {
 		files = append(files, filename)
 		count += 1
 	}
+	fmt.Printf("Got %d files, returning from prepareForUpload call\n", count)
 	return count
 }

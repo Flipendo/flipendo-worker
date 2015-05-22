@@ -100,8 +100,9 @@ func listenToWQueue() {
 				"chunks": nb,
 			})
 			failOnError(err, "Failed to marshal message")
+			fmt.Printf("publishing: %d chunks to %s\n", nb, _apiQueueName)
 			publishToQueue(_apiQueueName, "text/json", msg)
-
+			fmt.Println("Successfully published message to api channel")
 			return
 		case "transcode":
 			return

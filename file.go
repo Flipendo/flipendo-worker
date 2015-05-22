@@ -36,6 +36,7 @@ func (file *File) Split() int {
 		fmt.Println("failure in split")
 		log.Fatal(err)
 	}
+	fmt.Println("About to prepare for upload")
 	nb := prepareForUpload()
 	return nb
 }
