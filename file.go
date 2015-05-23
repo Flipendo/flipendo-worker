@@ -60,6 +60,7 @@ func (file *File) Concat(chunks int) {
 		"error":  false,
 	})
 	failOnError(err, "Failed to marshal message")
+	os.Remove(file.id)
 	publishToQueue(_apiQueueName, "text/json", msg)
 }
 
