@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 )
 
 const (
@@ -45,13 +45,22 @@ func (file *File) Split() int {
 	return nb
 }
 
-func (file *File) Concat() {
-	cmd, args := file.GetConcatCmd()
+func (file *File) Concat(chunks int) {
+	cmd, args := file.GetConcatCmd(chunks)
 	err := exec.Command(cmd, args...).Run()
 	if err != nil {
 		fmt.Println("failure in concat")
 		log.Fatal(err)
 	}
+	uploadFile("out/"+file.id+"."+_container, "merged"+"."+_container)
+	msg, err := json.Marshal(map[string]interface{}{
+		"action": "merged",
+		"id":     file.id,
+		"done":   true,
+		"error":  false,
+	})
+	failOnError(err, "Failed to marshal message")
+	publishToQueue(_apiQueueName, "text/json", msg)
 }
 
 func (file *File) Transcode(chunk string) {
@@ -125,7 +134,9 @@ func (file *File) GetTranscodeCmd(chunk string) (string, []string) {
 	return _baseCmd, args
 }
 
-func (file *File) GetConcatCmd() (string, []string) {
+func (file *File) GetConcatCmd(chunks int) (string, []string) {
+	list := getConcatList(file.id, chunks)
+
 	args := []string{}
 
 	if _overwrite {
@@ -134,12 +145,20 @@ func (file *File) GetConcatCmd() (string, []string) {
 	args = append(args, "-f")
 	args = append(args, "concat")
 	args = append(args, "-i")
-	args = append(args, file.filename)
+	args = append(args, list)
 	args = append(args, "-c")
 	args = append(args, "copy")
-	args = append(args, strings.Join([]string{"merged",
-		".mkv"}, ""))
+	args = append(args, "merged"+"."+_container)
 	fmt.Println(args)
 
 	return _baseCmd, args
+}
+
+func getConcatList(fileId string, chunks int) string {
+	file, err := os.Open("files.list")
+	failOnError(err, "Cannot create concat list")
+	for i := 0; i < chunks; i++ {
+		file.Write([]byte(_amazonUrl + "chunks/" + fileId + "/out/" + strconv.Itoa(i) + "." + _container + "\n"))
+	}
+	return "files.list"
 }

@@ -106,13 +106,16 @@ func listenToWQueue() {
 			publishToQueue(_apiQueueName, "text/json", msg)
 			fmt.Println("Successfully published message to api channel")
 		case "transcode":
-			fmt.Println("RECEIVED TRANSCODE MESSAGE, HURRAY")
+			fmt.Println("RECEIVED TRANSCODE MESSAGE")
 			file := NewFile(data["id"].(string) + data["extension"].(string))
 			file.id = data["id"].(string)
 			file.extension = data["extension"].(string)
 			file.Transcode(data["chunk"].(string))
-		case "concat":
+		case "merge":
 			fmt.Println("RECEIVED CONCAT MESSAGE, HURRAY")
+			file := NewFile(data["id"].(string))
+			file.id = data["id"].(string)
+			file.Concat(data["chunks"].(int))
 		default:
 			log.Fatal("Unrecognized action")
 		}
