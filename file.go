@@ -70,7 +70,7 @@ func (file *File) Transcode(chunk string) {
 		fmt.Println("failure in transcode")
 		log.Fatal(err)
 	}
-	uploadFile("chunks/"+file.id+"/out/"+chunk+"."+_container, chunk+"."+_container)
+	uploadFile("chunks/"+file.id+"/out/"+chunk+"."+_container, file.id+"/"+chunk+"."+_container)
 	msg, err := json.Marshal(map[string]interface{}{
 		"action": "transcoded",
 		"id":     file.id,
@@ -128,7 +128,7 @@ func (file *File) GetTranscodeCmd(chunk string) (string, []string) {
 		args = append(args, "-strict")
 		args = append(args, "-2")
 	}
-	args = append(args, chunk+".mkv")
+	args = append(args, file.id+"/"+chunk+".mkv")
 	fmt.Println(args)
 
 	return _baseCmd, args

@@ -61,6 +61,7 @@ func uploadFile(dest string, filename string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	os.Remove(filename)
 }
 
 func prepareForUpload(srcFile *File) int {
