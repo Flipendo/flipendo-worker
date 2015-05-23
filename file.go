@@ -64,6 +64,7 @@ func (file *File) Concat(chunks int) {
 }
 
 func (file *File) Transcode(chunk string) {
+	os.Mkdir(file.id, 0777)
 	cmd, args := file.GetTranscodeCmd(chunk)
 	err := exec.Command(cmd, args...).Run()
 	if err != nil {
