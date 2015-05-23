@@ -115,7 +115,7 @@ func listenToWQueue() {
 			fmt.Println("RECEIVED CONCAT MESSAGE, HURRAY")
 			file := NewFile(data["id"].(string))
 			file.id = data["id"].(string)
-			file.Concat(int(data["chunks"]))
+			file.Concat(int(data["chunks"].(float64)))
 		default:
 			log.Fatal("Unrecognized action")
 		}
