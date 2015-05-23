@@ -158,7 +158,7 @@ func getConcatList(fileId string, chunks int) string {
 	file, err := os.Create("files.list")
 	failOnError(err, "Cannot create concat list")
 	for i := 0; i < chunks; i++ {
-		file.Write([]byte(_amazonUrl + "chunks/" + fileId + "/out/" + strconv.Itoa(i) + "." + _container + "\n"))
+		file.Write([]byte("file '" + _amazonUrl + "chunks/" + fileId + "/out/" + strconv.Itoa(i) + "." + _container + "'\n"))
 	}
 	return "files.list"
 }
