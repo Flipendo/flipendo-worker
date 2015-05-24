@@ -92,6 +92,7 @@ func listenToWQueue() {
 		failOnError(err, "Failed to unmarshal message")
 		switch data["action"].(string) {
 		case "split":
+			log.Println("Received split message")
 			file := NewFile(data["id"].(string) + data["extension"].(string))
 			file.id = data["id"].(string)
 			file.extension = data["extension"].(string)
@@ -102,17 +103,17 @@ func listenToWQueue() {
 				"chunks": nb,
 			})
 			failOnError(err, "Failed to marshal message")
-			fmt.Printf("publishing: %d chunks to %s\n", nb, _apiQueueName)
+			log.Printf("publishing: %d chunks to %s\n", nb, _apiQueueName)
 			publishToQueue(_apiQueueName, "text/json", msg)
-			fmt.Println("Successfully published message to api channel")
+			log.Println("Successfully published message to api channel")
 		case "transcode":
-			fmt.Println("RECEIVED TRANSCODE MESSAGE")
+			log.Println("Received transcode message")
 			file := NewFile(data["id"].(string) + data["extension"].(string))
 			file.id = data["id"].(string)
 			file.extension = data["extension"].(string)
 			file.Transcode(data["chunk"].(string))
 		case "merge":
-			fmt.Println("RECEIVED CONCAT MESSAGE, HURRAY")
+			log.Println("Received merge message")
 			file := NewFile(data["id"].(string))
 			file.id = data["id"].(string)
 			file.Concat(int(data["chunks"].(float64)))
