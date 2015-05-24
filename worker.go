@@ -17,7 +17,7 @@ const (
 	_workerQueueName = "flipendo-worker"
 )
 
-var MQInstance struct {
+var mqInstance struct {
 	connection *amqp.Connection
 	channel    *amqp.Channel
 }
@@ -29,7 +29,7 @@ func failOnError(err error, msg string) {
 }
 
 func createQueues() {
-	_, err := MQInstance.channel.QueueDeclare(
+	_, err := mqInstance.channel.QueueDeclare(
 		_apiQueueName,
 		false,
 		true,
@@ -39,7 +39,7 @@ func createQueues() {
 	)
 	failOnError(err, "Failed to declare api queue")
 
-	_, err = MQInstance.channel.QueueDeclare(
+	_, err = mqInstance.channel.QueueDeclare(
 		_workerQueueName,
 		false,
 		true,
@@ -53,9 +53,9 @@ func createQueues() {
 func connectToBroker() {
 	var err error
 	for i := 0; i < 10; i++ {
-		fmt.Printf("Trying to connect to: %s\n", "amqp://"+os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR")+
+		log.Printf("Trying to connect to: %s\n", "amqp://"+os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR")+
 			":"+os.Getenv("RABBITMQ_PORT_5672_TCP_PORT"))
-		MQInstance.connection, err = amqp.Dial("amqp://" + os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR") +
+		mqInstance.connection, err = amqp.Dial("amqp://" + os.Getenv("RABBITMQ_PORT_5672_TCP_ADDR") +
 			":" + os.Getenv("RABBITMQ_PORT_5672_TCP_PORT"))
 		if err == nil {
 			break
@@ -63,18 +63,18 @@ func connectToBroker() {
 		time.Sleep(2 * time.Second)
 	}
 	failOnError(err, "Failed to connect to RabbitMQ")
-	fmt.Println("Successfully connected to RabbitMQ")
-	MQInstance.channel, err = MQInstance.connection.Channel()
+	log.Println("Successfully connected to RabbitMQ")
+	mqInstance.channel, err = mqInstance.connection.Channel()
 	failOnError(err, "Failed to open a channel")
 }
 
 func disconnectFromBroker() {
-	fmt.Println("Disconnecting from Message Broker...")
-	MQInstance.connection.Close()
+	log.Println("Disconnecting from Message Broker...")
+	mqInstance.connection.Close()
 }
 
 func listenToWQueue() {
-	msgs, err := MQInstance.channel.Consume(
+	msgs, err := mqInstance.channel.Consume(
 		_workerQueueName,
 		"",
 		true,
@@ -124,7 +124,7 @@ func listenToWQueue() {
 }
 
 func publishToQueue(queueName string, contentType string, body []byte) error {
-	err := MQInstance.channel.Publish(
+	err := mqInstance.channel.Publish(
 		"",
 		queueName,
 		false,

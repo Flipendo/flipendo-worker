@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -40,10 +39,10 @@ func (file *File) Split() int {
 	cmd, args := file.getSplitCmd()
 	err := exec.Command(cmd, args...).Run()
 	if err != nil {
-		fmt.Println("failure in split")
-		log.Fatal(err)
+		log.Println("failure in split for file", file.id)
+		return 0
 	}
-	fmt.Println("About to prepare for upload")
+	log.Println("About to prepare for upload")
 	nb := prepareForUpload(file)
 	return nb
 }

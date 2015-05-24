@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -14,7 +13,7 @@ import (
 	"github.com/AdRoll/goamz/s3"
 )
 
-var S3Instance struct {
+var s3Instance struct {
 	bucket *s3.Bucket
 }
 
@@ -25,7 +24,7 @@ func awsInit() error {
 	}
 	client := s3.New(auth, aws.APSoutheast2)
 
-	S3Instance.bucket = client.Bucket("flipendo")
+	s3Instance.bucket = client.Bucket("flipendo")
 	return nil
 }
 
@@ -57,7 +56,7 @@ func getFileContent(filename string) []byte {
 }
 
 func uploadFile(dest string, filename string) {
-	err := S3Instance.bucket.Put(dest, getFileContent(filename), "content-type", s3.PublicRead, s3.Options{})
+	err := s3Instance.bucket.Put(dest, getFileContent(filename), "content-type", s3.PublicRead, s3.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,8 +86,8 @@ func prepareForUpload(srcFile *File) int {
 			failOnError(err, "Failed to marshal message")
 			publishToQueue(_workerQueueName, "text/json", msg)
 		}(count)
-		count += 1
+		count++
 	}
-	fmt.Printf("Got %d files, returning from prepareForUpload call\n", count)
+	log.Printf("Got %d files, returning from prepareForUpload call\n", count)
 	return count
 }
