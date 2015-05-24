@@ -122,7 +122,7 @@ func listenToWQueue() {
 	}
 }
 
-func publishToQueue(queueName string, contentType string, body []byte) {
+func publishToQueue(queueName string, contentType string, body []byte) error {
 	err := MQInstance.channel.Publish(
 		"",
 		queueName,
@@ -133,7 +133,7 @@ func publishToQueue(queueName string, contentType string, body []byte) {
 			Body:        body,
 		},
 	)
-	failOnError(err, "Failed to publish a message")
+	return err
 }
 
 func main() {
