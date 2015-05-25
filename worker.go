@@ -138,15 +138,13 @@ func publishToQueue(queueName string, contentType string, body []byte) error {
 }
 
 func main() {
+	termChan := make(chan os.Signal)
+	signal.Notify(termChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	err := awsInit()
 	failOnError(err, "aws init failed")
 	connectToBroker()
 	defer disconnectFromBroker()
 	createQueues()
 	go listenToWQueue()
-
-	termChan := make(chan os.Signal)
-	signal.Notify(termChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-
 	<-termChan
 }
