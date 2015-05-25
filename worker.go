@@ -31,7 +31,7 @@ func failOnError(err error, msg string) {
 func createQueues() {
 	_, err := mqInstance.channel.QueueDeclare(
 		_apiQueueName,
-		false,
+		true,
 		true,
 		false,
 		false,
@@ -41,7 +41,7 @@ func createQueues() {
 
 	_, err = mqInstance.channel.QueueDeclare(
 		_workerQueueName,
-		false,
+		true,
 		true,
 		false,
 		false,
