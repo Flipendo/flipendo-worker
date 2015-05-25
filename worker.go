@@ -32,7 +32,7 @@ func createQueues() {
 	_, err := mqInstance.channel.QueueDeclare(
 		_apiQueueName,
 		true,
-		true,
+		false,
 		false,
 		false,
 		nil,
@@ -42,7 +42,7 @@ func createQueues() {
 	_, err = mqInstance.channel.QueueDeclare(
 		_workerQueueName,
 		true,
-		true,
+		false,
 		false,
 		false,
 		nil,
