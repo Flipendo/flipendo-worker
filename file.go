@@ -98,7 +98,7 @@ func (file *File) Transcode(chunk string) {
 	err = exec.Command(cmd, args...).Run()
 	if err != nil {
 		message["done"] = false
-		message["error"] = "Could not transcode chunk number" + chunk
+		message["error"] = "Could not transcode chunk number " + chunk + ". " + err.Error()
 		if msg, err = json.Marshal(message); err != nil {
 			log.Println("Could not marshal error message")
 			return
